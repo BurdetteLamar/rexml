@@ -3,7 +3,103 @@ require_relative 'functions'
 require_relative 'xpath_parser'
 
 module REXML
-  # Wrapper class.  Use this class to access the XPath functions.
+  # Wrapper class.  Use this class to access the \XPath functions.
+  #
+  # The public class methods in this class are:
+  #
+  # - REXML::XPath.first:: Returns the first node
+  #                        that meets the specified criteria.
+  # - REXML::XPath.match:: Returns an array of all nodes
+  #                        that meet the specified criteria.
+  # - REXML::XPath.each:: Calls the given block with each node
+  #                       that meets the specified criteria.
+  #
+  # Each of these methods takes five arguments that specify those criteria:
+  #
+  # - +element+:: The node where the search is to begin;
+  #               +element+ should be an REXML::Element object.
+  # - +path+:: The optional search path, relative to that node;
+  #            +path+ should be a valid xpath expression.
+  # - +namespaces+::
+  # - +variables+::
+  # - +options+::
+  #
+  # These arguments work the same way in each of the methods;
+  # for simplicity, the examples in this section use method #first.
+  #
+  # The source XML for many examples here is from file
+  # {books.xml}[https://www.w3schools.com/xml/books.xml] at w3schools.com.
+  # You may find it convenient to open that page in a new tab
+  # (Ctrl-click in some browsers).
+  #
+  # All examples here use the variables +doc+ and +root_ele+ resulting from:
+  #
+  #   require 'rexml/document'
+  #   require 'open-uri'
+  #   source_string = URI.open('https://www.w3schools.com/xml/books.xml').read
+  #   doc = REXML::Document.new(source_string)
+  #   root_ele = doc.root
+  #
+  # == Call with Single Argument +element+
+  #
+  # A call with single argument +element+ finds the element children of +element+.
+  #
+  # Method +first+ returns only the the first found element:
+  #
+  #   REXML::XPath.first(doc)        # => <bookstore> ... </>
+  #   REXML::XPath.first(root_ele)   # => <book category='cooking'> ... </>
+  #   book = root_ele.elements.first # => <book category='cooking'> ... </>
+  #   REXML::XPath.first(book)       # => <title lang='en'> ... </>
+  #
+  # Method +match+ returns all found elements:
+  #
+  #   REXML::XPath.match(doc)        # => [<bookstore> ... </>]
+  #   REXML::XPath.match(root_ele)   # =>
+  #                                  # [<book category='cooking'> ... </>,
+  #                                  #  <book category='children'> ... </>,
+  #                                  #  <book category='web'> ... </>,
+  #                                  #  <book category='web' cover='paperback'> ... </>]
+  #   book = root_ele.elements.first # => <book category='cooking'> ... </>
+  #   REXML::XPath.match(book)       # =>
+  #                                  # [<title lang='en'> ... </>,
+  #                                  #  <author> ... </>,
+  #                                  #  <year> ... </>,
+  #                                  #  <price> ... </>]
+  #
+  # Returns +nil+ if no matching element is found, or if the given +element+
+  # is not an element.
+  #
+  # == Call with Argument +path+
+  #
+  # A call with arguments +element+ and +path+ finds the element children of +element+
+  # that match the given +path+.
+  #
+  # A path that begins with a single slash character is an _absolute_ _path_.
+  #
+  # Method +first+ returns only the first found element:
+  #
+  #   REXML::XPath.first(doc, '/')                     # => <UNDEFINED> ... </> # doc
+  #   REXML::XPath.first(doc, '/bookstore')            # => <bookstore> ... </>
+  #   REXML::XPath.first(doc, '/bookstore/book')       # => <title lang='en'> ... </>
+  #   REXML::XPath.first(doc, '/bookstore/book/title') # => <title lang='en'> ... </>
+  #
+  # Method +match+ returns all found elements:
+  #
+  #   REXML::XPath.match(doc, '/')                     # => <UNDEFINED> ... </> # doc
+  #   REXML::XPath.match(doc, '/bookstore')            # => <bookstore> ... </>
+  #   REXML::XPath.match(doc, '/bookstore/book')       # => <title lang='en'> ... </>
+  #   REXML::XPath.match(doc, '/bookstore/book/title') # =>
+  #                                                    # [<title lang='en'> ... </>,
+  #                                                    #  <title lang='en'> ... </>,
+  #                                                    #  <title lang='en'> ... </>,
+  #                                                    #  <title lang='en'> ... </>]
+  #
+  # == Call with Argument +namespaces+
+  #
+  # == Call with Argument +variables+
+  #
+  # == Call with Argument +options+
+  #
   class XPath
     include Functions
     # A base Hash object, supposing to be used when initializing a
