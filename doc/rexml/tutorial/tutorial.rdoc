@@ -1,0 +1,211 @@
+= \REXML Tutorial
+
+== About the Examples
+
+All examples here assume that the following code has been executed:
+
+  require 'rexml/document'
+
+The source XML for many examples here is from file
+{books.xml}[https://www.w3schools.com/xml/books.xml] at w3schools.com.
+You may find it convenient to open that page in a new tab
+(Ctrl-click in some browsers).
+
+For convenience, we capture the XML into a string variable:
+
+  require 'open-uri'
+  source_string = URI.open('https://www.w3schools.com/xml/books.xml').read
+
+And into a file:
+
+  File.write('source_file.xml', source_string)
+
+== Parsing \XML \Source
+
+Use method REXML::Document.new to parse \XML source.
+
+The source may be a string:
+
+  doc = REXML::Document.new(source_string)
+
+Or an \IO stream:
+
+  doc = File.open('source_file.xml', 'r') do |io|
+    REXML::Document.new(io)
+  end
+
+Method <tt>URI.open</tt> returns a StringIO object,
+so the source can be a web page:
+
+  require 'open-uri'
+  io = URI.open("https://www.w3schools.com/xml/books.xml")
+  io.class # => StringIO
+  doc = REXML::Document.new(io)
+
+For any of these sources, the returned object is an REXML::Document:
+
+  doc.class # => REXML::Document
+
+== Searching the Document
+
+Use XPath methods to search for XML nodes.
+
+  REXML::XPath.match(root_ele, '/book')
+
+== Examining a Document Object
+
+An \REXML::Document object represents an XML document.
+
+It has a single element child, called the _root_ _element_:
+
+  root_ele = doc.elements.first
+  root_ele          # => <bookstore> ... </>
+  root_ele.class    # => REXML::Element
+  doc.elements.size # => 1
+
+The root element may be retrieved with method +root+:
+
+  doc.root # => <bookstore> ... </>
+
+If found in the source, the document also has:
+
+- An XML declaration (REXML::XMLDecl):
+
+    xml_decl = doc.xml_decl
+    xml_decl       # => <?xml ... ?>
+    xml_decl.class # => REXML::XMLDecl
+
+- An XML version string:
+
+  doc.version    # => "1.0"
+
+All the elements in a document are in a tree of objects
+rooted, unsurprisingly, in the root element:
+
+  root_ele.elements.each do |element|
+    p [element, element.class]
+  end
+
+Output:
+
+  [<book category='cooking'> ... </>, REXML::Element]
+  [<book category='children'> ... </>, REXML::Element]
+  [<book category='web'> ... </>, REXML::Element]
+  [<book category='web' cover='paperback'> ... </>, REXML::Element]
+
+Note that while in this example, all the children of the root element are
+elements of the same type (+book+), that is not true of all documents;
+a root element may have any mixture of child elements.
+
+Note also that the document is itself an element,
+because the parent class of REXML::Document is REXML::Element.
+
+== Examining an Element Object
+
+An REXML::Element object represents an XML element.
+
+An element has a name:
+
+  root_ele.name # => "bookstore"
+
+An element may have a parent:
+
+- The parent of a root element is the document:
+
+    root_ele.parent == doc # => true
+
+- The parent of any non-root element is another element, or +nil+:
+
+    first_book_ele = root_ele.elements.first
+    parent_ele = first_book_ele.parent
+    parent_ele                       # => <bookstore> ... </>
+    parent_ele.class                 # => REXML::Element
+    REXML::Element.new('foo').parent # => nil
+
+An element may have children.
+The children may include any combination of elements, text,
+comments, processing instructions, and CDATA.
+
+In our example, the root element has children that are text and elements:
+
+  doc.root.children.each {|child| p [child.class, child] }
+
+Output:
+
+  [REXML::Text, "\n\n    "]
+  [REXML::Element, <book category='COOKING'> ... </>]
+  [REXML::Text, "\n\n    "]
+  [REXML::Element, <book category='CHILDREN'> ... </>]
+  [REXML::Text, "\n\n    "]
+  [REXML::Element, <book category='WEB'> ... </>]
+  [REXML::Text, "\n\n    "]
+  [REXML::Element, <book category='WEB'> ... </>]
+  [REXML::Text, "\n\n    "]
+
+An element may have siblings:
+
+  doc.root.children.each_with_index do |child, i|
+    p [i, child]
+    p ['  Prev: ', child.previous_sibling]
+    p ['  Next: ', child.next_sibling]
+  end
+
+Output:
+
+  [0, "\n\n    "]
+  ["  Prev: ", nil]
+  ["  Next: ", <book category='COOKING'> ... </>]
+  [1, <book category='COOKING'> ... </>]
+  ["  Prev: ", "\n\n    "]
+  ["  Next: ", "\n\n    "]
+  [2, "\n\n    "]
+  ["  Prev: ", <book category='COOKING'> ... </>]
+  ["  Next: ", <book category='CHILDREN'> ... </>]
+  [3, <book category='CHILDREN'> ... </>]
+  ["  Prev: ", "\n\n    "]
+  ["  Next: ", "\n\n    "]
+  [4, "\n\n    "]
+  ["  Prev: ", <book category='CHILDREN'> ... </>]
+  ["  Next: ", <book category='WEB'> ... </>]
+  [5, <book category='WEB'> ... </>]
+  ["  Prev: ", "\n\n    "]
+  ["  Next: ", "\n\n    "]
+  [6, "\n\n    "]
+  ["  Prev: ", <book category='WEB'> ... </>]
+  ["  Next: ", <book category='WEB'> ... </>]
+  [7, <book category='WEB'> ... </>]
+  ["  Prev: ", "\n\n    "]
+  ["  Next: ", "\n\n    "]
+  [8, "\n\n    "]
+  ["  Prev: ", <book category='WEB'> ... </>]
+  ["  Next: ", nil]
+  ["  Prev: ", <book category='CHILDREN'> ... </>]
+  ["  Next: ", <book category='WEB'> ... </>]
+  [5, REXML::Element, <book category='WEB'> ... </>]
+  ["  Prev: ", "\n\n    "]
+  ["  Next: ", "\n\n    "]
+  [6, REXML::Text, "\n\n    "]
+  ["  Prev: ", <book category='WEB'> ... </>]
+  ["  Next: ", <book category='WEB'> ... </>]
+  [7, REXML::Element, <book category='WEB'> ... </>]
+  ["  Prev: ", "\n\n    "]
+  ["  Next: ", "\n\n    "]
+  [8, REXML::Text, "\n\n    "]
+  ["  Prev: ", <book category='WEB'> ... </>]
+  ["  Next: ", nil]
+
+An element may have attributes, stored in an REXML::Attributes object
+that is derived from class Hash:
+
+  attrs = first_book_ele.attributes
+  attrs                  # => {"category"=>category='COOKING'}
+  attrs.size             # => 1
+  attrs.class            # => REXML::Attributes
+  attrs.class.superclass # => Hash
+
+== Examining an Attribute Object
+
+== Traversing the REXML Tree
+
+== Searchnig the REXML Tree
+

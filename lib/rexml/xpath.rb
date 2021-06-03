@@ -24,8 +24,7 @@ module REXML
   # - +variables+::
   # - +options+::
   #
-  # These arguments work the same way in each of the methods;
-  # for simplicity, the examples in this section use method #first.
+  # These arguments work the same way in each of the methods.
   #
   # The source XML for many examples here is from file
   # {books.xml}[https://www.w3schools.com/xml/books.xml] at w3schools.com.
