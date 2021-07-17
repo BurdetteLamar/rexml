@@ -1,0 +1,164 @@
+== Location Paths in \REXML
+
+This page describes \REXML's use of location paths,
+which are specified in W3C's <em>XML Path Language (XPath) Version 1.0</em> in section
+"{Location Paths}[https://www.w3.org/TR/1999/REC-xpath-19991116/#location-paths]."
+
+\REXML represents an XML document as a tree of nodes;
+the topmost node is an instance of REXML::Document.
+
+The document commonly has a child node that is an instance of REXML::Element;
+that node, called the _root_ _element_, may be retrieved via method \REXML::Document#root.
+
+The root element is the top of a subtree of nodes;
+each node is an instance of one of these classes:
+
+- REXML::Element.
+- REXML::Text.
+- REXML::CData.
+- REXML::Comment.
+- REXML::Instruction.
+- REXML::Attribute.
+- REXML::Namespace.
+
+=== About the Examples
+
+Many examples here use the variables +doc+ and +root_ele+ resulting from:
+
+  books_xml = <<-EOT
+  <?xml version="1.0" encoding="UTF-8"?>
+  <bookstore>
+    <book category="cooking">
+      <title lang="en">Everyday Italian</title>
+      <author>Giada De Laurentiis</author>
+      <year>2005</year>
+      <price>30.00</price>
+    </book>
+    <book category="children">
+      <title lang="en">Harry Potter</title>
+      <author>J K. Rowling</author>
+      <year>2005</year>
+      <price>29.99</price>
+    </book>
+    <book category="web">
+      <title lang="en">XQuery Kick Start</title>
+      <author>James McGovern</author>
+      <author>Per Bothner</author>
+      <author>Kurt Cagle</author>
+      <author>James Linn</author>
+      <author>Vaidyanathan Nagarajan</author>
+      <year>2003</year>
+      <price>49.99</price>
+    </book>
+    <book category="web" cover="paperback">
+      <title lang="en">Learning XML</title>
+      <author>Erik T. Ray</author>
+      <year>2003</year>
+      <price>39.95</price>
+    </book>
+  </bookstore>
+  EOT
+  require 'rexml/document'
+  doc = REXML::Document.new(books_xml)
+  root_ele = doc.root
+  doc.class      # => REXML::Document
+  root_ele.class # => REXML::Element
+  root_ele       # => <bookstore> ... </>
+
+The examples here use method
+
+  ary = REXML::XPath.match(node, path)
+
+where:
+
+- +node+ is the node where the search begins.
+- +path+ is the path that controls the search.
+- +ary+ is the returned array of nodes (possibly empty).
+
+=== Location Paths
+
+A location path is a string that selects an array of nodes.
+Depending on the path, that array may be empty, may contain all nodes, or may
+contain any combination of nodes.
+
+There are two kinds of location paths:
+
+- Relative location paths.
+- Absolute location paths.
+
+==== Relative Location Paths
+
+A relative location path has one or more location steps, separated by <tt>/</tt>.
+
+- The steps are processed from left to right.
+- Each step selects
+
+
+A relative location path consists of a sequence of one or more location steps separated by /. The steps in a relative location path are composed together from left to right. Each step in turn selects a set of nodes relative to a context node. An initial sequence of steps is composed together with a following step as follows. The initial sequence of steps selects a set of nodes relative to a context node. Each node in that set is used as a context node for the following step. The sets of nodes identified by that step are unioned together. The set of nodes identified by the composition of the steps is this union. For example, child::div/child::para selects the para element children of the div element children of the context node, or, in other words, the para element grandchildren that have div parents.
+
+=== Absolute Paths
+
+A path beginning with one slash <tt>'/'</tt> is an _absolute_ _path_.
+
+Path <tt>'/'</tt>, with nothing following, selects only
+the document containing the given node,
+or if the node is not in a document, selects only the node itself:
+
+  ary = REXML::XPath.match(doc, '/')
+  ary.class       # => Array
+  ary             # => [<UNDEFINED> ... </>]
+  ary.first.class # => REXML::Document
+  ary = REXML::XPath.match(doc.root, '/')
+  ary             # => [<UNDEFINED> ... </>]
+  ary.first.class # => REXML::Document
+  ary = REXML::XPath.match(doc.root.elements.first, '/')
+  ary             # => [<UNDEFINED> ... </>]
+  ary.first.class # => REXML::Document
+  ary = REXML::XPath.match(REXML::Element.new('foo'), '/')
+  ary             # => [<foo/>]
+  ary.first.class # => REXML::Element
+
+
+Path <tt>'/rootname'</tt> selects the root element if it has that name:
+
+  ary = REXML::XPath.match(doc, '/bookstore')
+  ary             # => [<bookstore> ... </>]
+  ary = REXML::XPath.match(doc, '/nosuch')
+  ary             # => []
+
+Path <tt>'/rootname/childname'</tt> selects all children of the root element
+that have the given +childname+:
+
+  ary = REXML::XPath.match(doc, '/bookstore/book')
+  ary # =>  [<book category='cooking'> ... </>,
+      #      <book category='children'> ... </>,
+      #      <book category='web'> ... </>,
+      #      <book category='web' cover='paperback'> ... </>]
+
+=== Generic Paths
+
+A few paths are generic -- that is, they do not refer directly
+to any specific element in the document.
+
+- Path <tt>'..'</tt> selects only the parent of the given node, if it exists:
+
+    path = '..'
+    ary = REXML::XPath.match(doc, path)
+    ary # => []
+    ary = REXML::XPath.match(doc.root, path)
+    ary       # => [<UNDEFINED> ... </>] # doc
+    ary = REXML::XPath.match(doc.root.elements.first, path)
+    ary       # => [<bookstore> ... </>]
+    ary = REXML::XPath.match(REXML::Element.new('foo'), path)
+    ary       # => []
+
+- Trivially, path <tt>'.'</tt> selects only the given node:
+
+    path = '.'
+    ary = REXML::XPath.match(doc, path)
+    ary.class # => [<UNDEFINED> ... </>] # doc
+    ary = REXML::XPath.match(doc.root, path)
+    ary       # => [<bookstore> ... </>]
+    ary = REXML::XPath.match(REXML::Element.new('foo'), path)
+    ary       # => [<foo/>]
+
