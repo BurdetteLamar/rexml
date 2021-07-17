@@ -52,6 +52,7 @@ so the source can be from a web page:
 
 For any of these sources, the returned object is an REXML::Document:
 
+  doc       # => <UNDEFINED> ... </>
   doc.class # => REXML::Document
 
 === Context (Parsing Options)
@@ -181,26 +182,79 @@ An REXML::Element object represents an XML element.
 
 === Inside the Element
 
-  #context
-  #document
-  #inspect
-  #node_type
-  #raw
-  #size
-  #bytes
-  #index
+Use method REXML::Element#inspect to retrieve a brief string representation.
+
+  doc.root.inspect # => "<bookstore> ... </>"
+
+Use inherited method REXML::Child.bytes to retrieve an extended
+string representation.
+
+  doc.root.bytes # => "<bookstore>\n\n<book category='cooking'>\n  <title lang='en'>Everyday Italian</title>\n  <author>Giada De Laurentiis</author>\n  <year>2005</year>\n  <price>30.00</price>\n</book>\n\n<book category='children'>\n  <title lang='en'>Harry Potter</title>\n  <author>J K. Rowling</author>\n  <year>2005</year>\n  <price>29.99</price>\n</book>\n\n<book category='web'>\n  <title lang='en'>XQuery Kick Start</title>\n  <author>James McGovern</author>\n  <author>Per Bothner</author>\n  <author>Kurt Cagle</author>\n  <author>James Linn</author>\n  <author>Vaidyanathan Nagarajan</author>\n  <year>2003</year>\n  <price>49.99</price>\n</book>\n\n<book category='web' cover='paperback'>\n  <title lang='en'>Learning XML</title>\n  <author>Erik T. Ray</author>\n  <year>2003</year>\n  <price>39.95</price>\n</book>\n\n</bookstore>"
+
+Use method REXML::Element.node_type to retrieve the node type (always +:element+):
+
+  doc.root.node_type # => :element
+
+Use method REXML::Element#raw to retrieve whether (+true+ or +nil+)
+raw mode is set.
+
+  doc.root.raw # => nil
+
+Use method REXML::Element.context to retrieve the context hash
+(see {Element Context}[../context_rdoc.html]):
+
+  doc.root.raw # => nil
 
 === Relationships
 
 [Ancestors]
 
-  #root
-  #root_node
-  #parent?
-  #parent
-  #document
-  #parent?
-  #index_in_parent
+  Use method REXML::Element#document to retrieve the containing document, if any:
+
+    ele = doc.root.elements.first   # => <book category='cooking'> ... </>
+    ele.document                    # => <UNDEFINED> ... </>
+    ele = REXML::Element.new('foo') # => <foo/>
+    ele.document                    # => nil
+
+  Use method REXML::Element#root to retrieve the root element:
+
+    ele = doc.root.elements.first   # => <book category='cooking'> ... </>
+    ele.root                        # => <bookstore> ... </>
+    ele = REXML::Element.new('foo') # => <foo/>
+    ele.root                        # => <foo/>
+
+  Use method REXML::Element#root_node to retrieve the most distant ancestor,
+  which is the containing document, if any, otherwise the root element:
+
+    ele = doc.root.elements.first   # => <book category='cooking'> ... </>
+    ele.root_node                   # => <UNDEFINED> ... </>
+    ele = REXML::Element.new('foo') # => <foo/>
+    ele.root_node                   # => <foo/>
+
+  Use inherited method REXML::Child#parent to retrieve the parent
+
+    ele = doc.root                # => <bookstore> ... </>
+    ele.parent                    # => <UNDEFINED> ... </>
+    ele = doc.root.elements.first # => <book category='cooking'> ... </>
+    ele.parent                    # => <bookstore> ... </>
+
+  Use included method REXML::Node#index_in_parent to retrieve the zero-based index
+  of the element among all of its parents children (not just the element children):
+
+    doc.root.children # =>
+      # ["\n\n",
+      #  <book category='cooking'> ... </>,
+      #  "\n\n",
+      #  <book category='children'> ... </>,
+      #  "\n\n",
+      #  <book category='web'> ... </>,
+      #  "\n\n",
+      #  <book category='web' cover='paperback'> ... </>,
+      #  "\n\n"]
+    ele = doc.root.elements[1] # => <book category='cooking'> ... </>
+    ele.index_in_parent # => 2
+    ele = doc.root.elements[2]  # => <book category='children'> ... </>
+    ele.index_in_parent# => 4
 
 [Siblings]
 
@@ -213,6 +267,8 @@ An REXML::Element object represents an XML element.
 
 [Descendants]
 
+  #size
+  #parent?
   #[]
   #cdatas
   #comments
@@ -222,6 +278,7 @@ An REXML::Element object represents an XML element.
   #has_elements?
   #has_text?
   #children
+  #index
 
 === Attributes
 
