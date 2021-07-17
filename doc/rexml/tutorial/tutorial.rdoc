@@ -12,6 +12,11 @@ The source XML for many examples here is from file
 You may find it convenient to open that page in a new tab
 (Ctrl-click in some browsers).
 
+Note that your browser may display the XML with modified whitespace
+and without the XML declaration, which in this case is:
+
+  <?xml version="1.0" encoding="UTF-8"?>
+
 For convenience, we capture the XML into a string variable:
 
   require 'open-uri'
@@ -22,6 +27,8 @@ And into a file:
   File.write('source_file.xml', source_string)
 
 == Parsing \XML \Source
+
+=== REXML::Document.new
 
 Use method REXML::Document.new to parse XML source.
 
@@ -47,6 +54,20 @@ For any of these sources, the returned object is an REXML::Document:
 
   doc.class # => REXML::Document
 
+=== Context (Parsing Options)
+
+The context for parsing a document is a hash that influences
+the way the XML is read and stored.
+
+The context entries are:
+
+- +:respect_whitespace+: controls treatment of whitespace.
+- +:compress_whitespace+: determines whether whitespace is compressed.
+- +:ignore_whitespace_nodes+: determines whether whitespace-only nodes are to be ignored.
+- +:raw+: controls treatment of special characters and entities.
+
+See {Element Context}[../context_rdoc.html]
+
 == Exploring the Document
 
 An REXML::Document object represents an XML document.
@@ -58,7 +79,7 @@ A document inherits from its ancestor classes:
     - REXML::Element (includes module REXML::Namespace).
       - REXML::Document
 
-This section covers only properties unique to a document
+This section covers only properties and methods unique to a document
 (that is, not inherited or included).
 
 [Root Element]
@@ -126,9 +147,7 @@ This section covers only properties unique to a document
 
     doc.root.document.class # => REXML::Document
 
-=== The Document's Node Tree
-
-Thg nodes in a document form a tree, descending from the root element:
+The payload of a document is a tree of nodes, descending from the root element:
 
   root_ele.children.each do |child|
     p [child, child.class]
@@ -146,20 +165,7 @@ Output:
   [REXML::Element, <book category='web' cover='paperback'> ... </>]
   [REXML::Text, "\n\n"]
 
-Element nodes in the document may be accessed separately:
-
-  root_ele.elements.each do |element|
-    p [element.class, element]
-  end
-
-Output:
-
-  [REXML::Element, <book category='cooking'> ... </>]
-  [REXML::Element, <book category='children'> ... </>]
-  [REXML::Element, <book category='web'> ... </>]
-  [REXML::Element, <book category='web' cover='paperback'> ... </>]
-
-Note that while in this example, all the children of the root element are
+Note that while in this example, all the element children of the root element are
 elements of the same name, <tt>'book'</tt>, that is not true of all documents;
 a root element (or any other element) may have any mixture of child elements.
 
@@ -169,51 +175,89 @@ Note also that the document is itself an element:
 
 because the parent class of \REXML::Document is \REXML::Element.
 
-== Exploring Elements
+== Exploring an Element
 
 An REXML::Element object represents an XML element.
 
-::new
-#[]
-#add_attribute
-#add_attributes
-#add_element
-#add_namespace
-#add_text
-#attribute
-#cdatas
-#clone
-#comments
-#delete_attribute
-#delete_element
-#delete_namespace
-#document
-#each_element
-#each_element_with_attribute
-#each_element_with_text
-#get_elements
-#get_text
-#has_attributes?
-#has_elements?
-#has_text?
-#ignore_whitespace_nodes
-#inspect
-#instructions
-#namespace
-#namespaces
-#next_element
-#node_type
-#prefixes
-#previous_element
-#raw
-#root
-#root_node
-#text
-#text=
-#texts
-#whitespace
-#write
-#xpath
+=== Inside the Element
+
+  #context
+  #document
+  #inspect
+  #node_type
+  #raw
+  #size
+  #bytes
+  #index
+
+=== Relationships
+
+[Ancestors]
+
+  #root
+  #root_node
+  #parent?
+  #parent
+  #document
+  #parent?
+  #index_in_parent
+
+[Siblings]
+
+  #next_element
+  #previous_element
+  #next_sibling
+  #previous_sibling
+  #next_sibling_node
+  #previous_sibling_node
+
+[Descendants]
+
+  #[]
+  #cdatas
+  #comments
+  #elements
+  #instructions
+  #texts
+  #has_elements?
+  #has_text?
+  #children
+
+=== Attributes
+
+  #attribute
+  #attributes
+  #has_attributes?
+  #[]
+
+=== Whitespace
+
+  #ignore_whitespace_nodes?
+  #whitespace
+
+=== Namespaces
+
+  #namespace
+  #namespaces
+  #prefixes
+
+== Searching
+
+  #text
+  #xpath
+  #get_elements
+  #get_text
+  #find_first_recursive
+  XPath
+
+== Traversing
+
+  #each_element_with_attribute
+  #each_element
+  #each_element_with_text
+  #each_child
+  #each_index
+
 
 
 
