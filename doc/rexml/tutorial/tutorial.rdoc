@@ -1,5 +1,11 @@
-
 = \REXML Tutorial
+
+The two classes you're likely to be using most of the time are:
+
+- REXML::Document: represents an XML document.
+- REXML::Element: represents an XML element.
+
+This tutorial covers both classes in great detail.
 
 == Preliminaries
 
@@ -180,6 +186,18 @@ because the parent class of \REXML::Document is \REXML::Element.
 
 An REXML::Element object represents an XML element.
 
+An element inherits from its ancestor classes:
+
+- REXML::Child (includes module REXML::Node)
+  - REXML::Parent (includes module {Enumerable}[rdoc-ref:Enumerable]).
+    - REXML::Element (includes module REXML::Namespace).
+
+This section covers methods:
+
+- Defined in REXML::Element itself.
+- Inherited from REXML::Parent and REXML::Child.
+- Included from REXML::Node.
+
 === Inside the Element
 
 Use method REXML::Element#inspect to retrieve a brief string representation.
@@ -238,8 +256,10 @@ Use method REXML::Element.context to retrieve the context hash
     ele = doc.root.elements.first # => <book category='cooking'> ... </>
     ele.parent                    # => <bookstore> ... </>
 
-  Use included method REXML::Node#index_in_parent to retrieve the zero-based index
-  of the element among all of its parents children (not just the element children):
+  Use included method REXML::Node#index_in_parent to retrieve the index
+  of the element among all of its parents children (not just the element children).
+  Note that while the index for <tt>doc.root.elements[n]</tt> is 1-based,
+  the returned index is 0-based.
 
     doc.root.children # =>
       # ["\n\n",
@@ -258,41 +278,125 @@ Use method REXML::Element.context to retrieve the context hash
 
 [Siblings]
 
-  #next_element
-  #previous_element
-  #next_sibling
-  #previous_sibling
-  #next_sibling_node
-  #previous_sibling_node
+  Use method REXML::Element.next_element to retrieve the first following
+  sibling that is itself an element (+nil+ if there is none):
 
-[Descendants]
+    ele = doc.root.elements[1]
+    while ele do
+      p [ele.class, ele]
+      ele = ele.next_element
+    end
+    p ele
 
-  #size
-  #parent?
+  Output:
+
+        p ele
+    [REXML::Element, <book category='cooking'> ... </>]
+    [REXML::Element, <book category='children'> ... </>]
+    [REXML::Element, <book category='web'> ... </>]
+    [REXML::Element, <book category='web' cover='paperback'> ... </>]
+    nil
+
+  Use method REXML::Element.next_element to retrieve the first preceding
+  sibling that is itself an element (+nil+ if there is none):
+
+    ele = doc.root.elements[4]
+    while ele do
+      p [ele.class, ele]
+      ele = ele.previous_element
+    end
+    p ele
+
+  Output:
+
+    [REXML::Element, <book category='web' cover='paperback'> ... </>]
+    [REXML::Element, <book category='web'> ... </>]
+    [REXML::Element, <book category='children'> ... </>]
+    [REXML::Element, <book category='cooking'> ... </>]
+    nil
+
+  Use included method REXML::Node.next_sibling_node
+  (or its alias <tt>next_sibling</tt>) to retrieve the first following node
+  regardless of its class:
+
+    node = doc.root.children[0]
+    while node do
+      p [node.class, node]
+      node = node.next_sibling
+    end
+    p node
+
+  Output:
+
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='cooking'> ... </>]
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='children'> ... </>]
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='web'> ... </>]
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='web' cover='paperback'> ... </>]
+    [REXML::Text, "\n\n"]
+    nil
+
+  Use included method REXML::Node.previous_sibling_node
+  (or its alias <tt>previous_sibling</tt>) to retrieve the first preceding node
+  regardless of its class:
+
+    node = doc.root.children[-1]
+    while node do
+      p [node.class, node]
+      node = node.previous_sibling
+    end
+    p node
+
+  Output:
+
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='web' cover='paperback'> ... </>]
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='web'> ... </>]
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='children'> ... </>]
+    [REXML::Text, "\n\n"]
+    [REXML::Element, <book category='cooking'> ... </>]
+    [REXML::Text, "\n\n"]
+    nil
+
+[Children]
+
+Use inherited method REXML::Parent.size to retrieve the count
+of nodes (of all types) in the element:
+
+  doc.root.size # => 9
+
+Use inherited method REXML::Parent.children to retrieve an array
+of the nodes
+  #children
   #[]
+  #index
   #cdatas
   #comments
   #elements
   #instructions
   #texts
+  #parent?
   #has_elements?
   #has_text?
-  #children
-  #index
 
-=== Attributes
+== Attributes
 
+  #[]
   #attribute
   #attributes
   #has_attributes?
-  #[]
 
-=== Whitespace
+== Whitespace
 
   #ignore_whitespace_nodes?
   #whitespace
 
-=== Namespaces
+== Namespaces
 
   #namespace
   #namespaces
@@ -305,9 +409,8 @@ Use method REXML::Element.context to retrieve the context hash
   #get_elements
   #get_text
   #find_first_recursive
-  XPath
 
-== Traversing
+- Traversing
 
   #each_element_with_attribute
   #each_element
