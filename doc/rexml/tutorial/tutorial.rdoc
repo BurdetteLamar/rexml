@@ -200,32 +200,44 @@ This section covers methods:
 
 === Inside the Element
 
-Use method REXML::Element#inspect to retrieve a brief string representation.
+[Brief String Representation]
 
-  doc.root.inspect # => "<bookstore> ... </>"
+  Use method REXML::Element#inspect to retrieve a brief string representation.
 
-Use inherited method REXML::Child.bytes to retrieve an extended
-string representation.
+    doc.root.inspect # => "<bookstore> ... </>"
 
-  doc.root.bytes # => "<bookstore>\n\n<book category='cooking'>\n  <title lang='en'>Everyday Italian</title>\n  <author>Giada De Laurentiis</author>\n  <year>2005</year>\n  <price>30.00</price>\n</book>\n\n<book category='children'>\n  <title lang='en'>Harry Potter</title>\n  <author>J K. Rowling</author>\n  <year>2005</year>\n  <price>29.99</price>\n</book>\n\n<book category='web'>\n  <title lang='en'>XQuery Kick Start</title>\n  <author>James McGovern</author>\n  <author>Per Bothner</author>\n  <author>Kurt Cagle</author>\n  <author>James Linn</author>\n  <author>Vaidyanathan Nagarajan</author>\n  <year>2003</year>\n  <price>49.99</price>\n</book>\n\n<book category='web' cover='paperback'>\n  <title lang='en'>Learning XML</title>\n  <author>Erik T. Ray</author>\n  <year>2003</year>\n  <price>39.95</price>\n</book>\n\n</bookstore>"
+[Extended String Representation]
 
-Use method REXML::Element.node_type to retrieve the node type (always +:element+):
+  Use inherited method REXML::Child.bytes to retrieve an extended
+  string representation.
 
-  doc.root.node_type # => :element
+    doc.root.bytes # => "<bookstore>\n\n<book category='cooking'>\n  <title lang='en'>Everyday Italian</title>\n  <author>Giada De Laurentiis</author>\n  <year>2005</year>\n  <price>30.00</price>\n</book>\n\n<book category='children'>\n  <title lang='en'>Harry Potter</title>\n  <author>J K. Rowling</author>\n  <year>2005</year>\n  <price>29.99</price>\n</book>\n\n<book category='web'>\n  <title lang='en'>XQuery Kick Start</title>\n  <author>James McGovern</author>\n  <author>Per Bothner</author>\n  <author>Kurt Cagle</author>\n  <author>James Linn</author>\n  <author>Vaidyanathan Nagarajan</author>\n  <year>2003</year>\n  <price>49.99</price>\n</book>\n\n<book category='web' cover='paperback'>\n  <title lang='en'>Learning XML</title>\n  <author>Erik T. Ray</author>\n  <year>2003</year>\n  <price>39.95</price>\n</book>\n\n</bookstore>"
 
-Use method REXML::Element#raw to retrieve whether (+true+ or +nil+)
-raw mode is set.
+[Node Type]
 
-  doc.root.raw # => nil
+  Use method REXML::Element.node_type to retrieve the node type (always +:element+):
 
-Use method REXML::Element.context to retrieve the context hash
-(see {Element Context}[../context_rdoc.html]):
+    doc.root.node_type # => :element
 
-  doc.root.raw # => nil
+[Raw Mode]
+
+  Use method REXML::Element#raw to retrieve whether (+true+ or +nil+)
+  raw mode is set.
+
+    doc.root.raw # => nil
+
+[Context]
+
+  Use method REXML::Element.context to retrieve the context hash
+  (see {Element Context}[../context_rdoc.html]):
+
+    doc.root.context # => {}
 
 === Relationships
 
-[Ancestors]
+==== Ancestors
+
+[Containing Document]
 
   Use method REXML::Element#document to retrieve the containing document, if any:
 
@@ -234,12 +246,16 @@ Use method REXML::Element.context to retrieve the context hash
     ele = REXML::Element.new('foo') # => <foo/>
     ele.document                    # => nil
 
+[Root Element]
+
   Use method REXML::Element#root to retrieve the root element:
 
     ele = doc.root.elements.first   # => <book category='cooking'> ... </>
     ele.root                        # => <bookstore> ... </>
     ele = REXML::Element.new('foo') # => <foo/>
     ele.root                        # => <foo/>
+
+[Root Node]
 
   Use method REXML::Element#root_node to retrieve the most distant ancestor,
   which is the containing document, if any, otherwise the root element:
@@ -248,6 +264,8 @@ Use method REXML::Element.context to retrieve the context hash
     ele.root_node                   # => <UNDEFINED> ... </>
     ele = REXML::Element.new('foo') # => <foo/>
     ele.root_node                   # => <foo/>
+
+[Parent]
 
   Use inherited method REXML::Child#parent to retrieve the parent
 
@@ -276,7 +294,9 @@ Use method REXML::Element.context to retrieve the context hash
     ele = doc.root.elements[2]  # => <book category='children'> ... </>
     ele.index_in_parent# => 4
 
-[Siblings]
+==== Siblings
+
+[Next Element]
 
   Use method REXML::Element.next_element to retrieve the first following
   sibling that is itself an element (+nil+ if there is none):
@@ -297,7 +317,9 @@ Use method REXML::Element.context to retrieve the context hash
     [REXML::Element, <book category='web' cover='paperback'> ... </>]
     nil
 
-  Use method REXML::Element.next_element to retrieve the first preceding
+[Previous Element]
+
+  Use method REXML::Element.previous_element to retrieve the first preceding
   sibling that is itself an element (+nil+ if there is none):
 
     ele = doc.root.elements[4]
@@ -314,6 +336,8 @@ Use method REXML::Element.context to retrieve the context hash
     [REXML::Element, <book category='children'> ... </>]
     [REXML::Element, <book category='cooking'> ... </>]
     nil
+
+[Next Node]
 
   Use included method REXML::Node.next_sibling_node
   (or its alias <tt>next_sibling</tt>) to retrieve the first following node
@@ -339,6 +363,8 @@ Use method REXML::Element.context to retrieve the context hash
     [REXML::Text, "\n\n"]
     nil
 
+[Previous Node]
+
   Use included method REXML::Node.previous_sibling_node
   (or its alias <tt>previous_sibling</tt>) to retrieve the first preceding node
   regardless of its class:
@@ -363,26 +389,148 @@ Use method REXML::Element.context to retrieve the context hash
     [REXML::Text, "\n\n"]
     nil
 
+==== Children
+
+[Size]
+
+  Use inherited method REXML::Parent.size to retrieve the count
+  of nodes (of all types) in the element:
+
+    doc.root.size # => 9
+
 [Children]
 
-Use inherited method REXML::Parent.size to retrieve the count
-of nodes (of all types) in the element:
+  Use inherited method REXML::Parent.children to retrieve an array
+  of the child nodes (of all types):
 
-  doc.root.size # => 9
+    doc.root.children # =>
+                      # ["\n\n",
+                      #  <book category='cooking'> ... </>,
+                      #  "\n\n",
+                      #  <book category='children'> ... </>,
+                      #  "\n\n",
+                      #  <book category='web'> ... </>,
+                      #  "\n\n",
+                      #  <book category='web' cover='paperback'> ... </>,
+                      #  "\n\n"]
 
-Use inherited method REXML::Parent.children to retrieve an array
-of the nodes
-  #children
-  #[]
-  #index
-  #cdatas
-  #comments
-  #elements
-  #instructions
-  #texts
-  #parent?
-  #has_elements?
-  #has_text?
+[Child at Index]
+
+  Use method REXML::Element.[] to retrieve the child at a given numerical index,
+  or +nil+ if there is no such child:
+
+    doc.root[0]  # => "\n\n"
+    doc.root[1]  # => <book category='cooking'> ... </>
+    doc.root[7]  # => <book category='web' cover='paperback'> ... </>
+    doc.root[8]  # => "\n\n"
+
+    doc.root[-1] # => "\n\n"
+    doc.root[-2] # => <book category='web' cover='paperback'> ... </>
+
+    doc.root[50] # => nil
+
+[Index of Child]
+
+  Use method REXML::Element.index to retrieve the zero-based child index
+  of the given object, or <tt>#size - 1</tt> if there is no such child:
+
+    ele = doc.root     # => <bookstore> ... </>
+    ele.index(ele[0])  # => 0
+    ele.index(ele[1])  # => 1
+    ele.index(ele[7])  # => 7
+    ele.index(ele[8])  # => 8
+
+    ele.index(ele[-1]) # => 8
+    ele.index(ele[-2]) # => 7
+
+    ele.index(ele[50]) # => 8
+
+[Element Children]
+
+  Use method REXML::.has_elements? to retrieve whether the element
+  has element children:
+
+    doc.root.has_elements?                  # => true
+    REXML::Element.new('foo').has_elements? # => false
+
+  Use method REXML::Element.elements to retrieve the REXML::Elements object
+  containing the element children:
+
+    eles = doc.root.elements
+    eles      # => #<REXML::Elements:0x000001ee2848e960 @element=<bookstore> ... </>>
+    eles.size # => 4
+
+[CDATA Children]
+
+  Use method REXML::Element.cdatas to retrieve a frozen array of CDATA children:
+
+    xml_string = <<-EOT
+      <root>
+        <![CDATA[foo]]>
+        <![CDATA[bar]]>
+      </root>
+    EOT
+    d = REXML::Document.new(xml_string)
+    cds = d.root.cdatas      # => ["foo", "bar"]
+    cds.frozen?              # => true
+    cds.map {|cd| cd.class } # => [REXML::CData, REXML::CData]
+
+[Comment Children]
+
+  Use method REXML::Element.comments to retrieve a frozen array of comment children:
+
+    xml_string = <<-EOT
+      <root>
+        <!--foo-->
+        <!--bar-->
+      </root>
+    EOT
+    d = REXML::Document.new(xml_string)
+    cs = d.root.comments
+    cs.frozen?            # => true
+    cs.map {|c| c.class } # => [REXML::Comment, REXML::Comment]
+    cs.map {|c| c.to_s }  # => ["foo", "bar"]
+
+[Processing Instruction Children]
+
+  Use method REXML::Element.instructions to retrieve a frozen array
+  of processing instruction children:
+
+    xml_string = <<-EOT
+      <root>
+        <?target0 foo?>
+        <?target1 bar?>
+      </root>
+    EOT
+    d = REXML::Document.new(xml_string)
+    instrs = d.root.instructions
+    instrs.frozen?            # => true
+    instrs.map {|i| i.class } # => [REXML::Instruction, REXML::Instruction]
+    instrs.map {|i| i.to_s }  # => ["<?target0 foo?>", "<?target1 bar?>"]
+
+[Text Children]
+
+  Use method REXML::Element.has_text? to retrieve whether the element
+  has text children:
+
+    doc.root.has_text?                  # => true
+    REXML::Element.new('foo').has_text? # => false
+
+  Use method REXML::Element.texts to retrieve a frozen array of text children:
+
+    xml_string = '<root><a/>text<b/>more<c/></root>'
+    d = REXML::Document.new(xml_string)
+    ts = d.root.texts
+    ts.frozen?            # => true
+    ts.map {|t| t.class } # => [REXML::Text, REXML::Text]
+    ts.map {|t| t.to_s }  # => ["text", "more"]
+
+[Parenthood]
+
+  Use inherited method REXML::Parent.parent? to retrieve whether the element is a parent;
+  always returns +true+; only REXML::Child#parent returns +false+.
+
+     doc.root.parent? # => true
 
 == Attributes
 
