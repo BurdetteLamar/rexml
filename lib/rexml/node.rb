@@ -6,6 +6,16 @@ require_relative "formatters/default"
 module REXML
   # Represents a node in the tree.  Nodes are never encountered except as
   # superclasses of other objects.  Nodes have siblings.
+  #
+  # == In a Hurry?
+  #
+  # If you're somewhat familiar with XML
+  # and have a particular task in mind,
+  # you may want to see the
+  # {tasks pages}[../doc/rexml/tasks/rdoc/master_toc_rdoc.html],
+  # and in particular, the
+  # {tasks for nodes}[../doc/rexml/tasks/rdoc/master_toc_rdoc.html#label-Node].
+  #
   module Node
     # @return the next sibling (nil if unset)
     def next_sibling_node

@@ -6,6 +6,16 @@ module REXML
   # A Child object is something contained by a parent, and this class
   # contains methods to support that.  Most user code will not use this
   # class directly.
+  #
+  # == In a Hurry?
+  #
+  # If you're somewhat familiar with XML
+  # and have a particular task in mind,
+  # you may want to see the
+  # {tasks pages}[../doc/rexml/tasks/rdoc/master_toc_rdoc.html],
+  # and in particular, the
+  # {tasks for children}[../doc/rexml/tasks/rdoc/master_toc_rdoc.html#label-Child].
+  #
   class Child
     include Node
     attr_reader :parent         # The Parent of this object

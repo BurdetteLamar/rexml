@@ -5,6 +5,15 @@ module REXML
   # A parent has children, and has methods for accessing them.  The Parent
   # class is never encountered except as the superclass for some other
   # object.
+  # == In a Hurry?
+  #
+  # If you're somewhat familiar with XML
+  # and have a particular task in mind,
+  # you may want to see the
+  # {tasks pages}[../doc/rexml/tasks/rdoc/master_toc_rdoc.html],
+  # and in particular, the
+  # {tasks for parents}[../doc/rexml/tasks/rdoc/master_toc_rdoc.html#label-Parent].
+  #
   class Parent < Child
     include Enumerable
 
