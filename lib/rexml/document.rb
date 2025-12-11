@@ -15,10 +15,12 @@ require_relative "parsers/treeparser"
 
 module REXML
 
+  # :markup: markdown
+  #
   # An REXML::Document object represents an XML document;
   # on this page, we'll refer to such an object simply as a _document_.
   #
-  # == In a Hurry?
+  # ## In a Hurry?
   #
   # If you're somewhat familiar with XML
   # and have a particular task in mind,
@@ -27,112 +29,160 @@ module REXML
   # and in particular, the
   # {tasks page for documents}[../doc/rexml/tasks/tocs/document_toc_rdoc.html].
   #
+  # ## The \Document \Object
+  #
   # A \Document object has a tree structure;
   # it has no parent.
   #
   # Its immediate children may include any or all of these:
   #
-  # - XML declaration: an REXML::Declaration object.
-  # - Document type: an REXML::DocType object.
-  # - Root element: an REXML::Element object.
-  # - Comments: one or more REXML::Comment objects.
-  # - Processing instructions: one or more REXML::Instruction objects.
+  # - [XML declaration][xml declaration].
+  # - [Document type][document type].
+  # - [Root element][root element].
+  # - [Comments][comments].
+  # - [Processing instructions][processing instructions].
   #
-  # == \Document Attributes
+  # The document also has certain attributes:
   #
   # - Name
   # - Node Type
   # - Encoding
-  # - Declaration
   # - Version
   # - Stand-Alone?
   #
+  # ## \Document Children
   #
-  # == \Document Children
+  # ### XML \Declaration
   #
-  # === XML \Declaration
+  # A document may have an REXML::XMLDecl object as a child:
   #
-  # A document has an XML declaration:
+  # ```
+  # xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+  # doc = REXML::Document.new(xml)
+  # doc.children.each {|child| puts "  #{child.class} #{child.to_s}" }
+  #   REXML::XMLDecl <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+  # ```
   #
-  #   # Default XML declaration.
-  #   doc = REXML::Document.new('')
-  #   doc.xml_decl.class # => REXML::XMLDecl
-  #   doc.xml_decl.to_s  # => ""
+  # Methods #xml_decl, #version, #encoding, and #stand_alone?
+  # return information about the XML declaration:
   #
-  # The XML declaration may be explicitly initialized:
-  #
-  #   s = '<?xml version="1.0" encoding="UTF-8"?><root/>'
-  #   doc = REXML::Document.new(s)
-  #   doc.xml_decl.class # => REXML::XMLDecl
-  #   doc.xml_decl.to_s  # => "<?xml version='1.0' encoding='UTF-8'?>"
+  # ```
+  # doc.xml_decl.to_s # => "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>"
+  # doc.version       # => "1.0"
+  # doc.encoding      # => "UTF-8"
+  # doc.stand_alone?  # => "yes"
+  # ```
   #
   # The XML declaration may be replaced:
   #
-  #   doc.add(REXML::XMLDecl.new)
-  #   doc.xml_decl.to_s # => "<?xml version='1.0'?>"
+  # ```
+  # doc.add(REXML::XMLDecl.new)
+  # doc.children.each {|child| puts "  #{child.class} #{child.to_s}" }
+  #   REXML::XMLDecl <?xml version='1.0'?>
+  # doc.xml_decl.to_s # => "<?xml version='1.0'?>"
+  # doc.version       # => "1.0"
+  # doc.encoding      # => "UTF-8"
+  # doc.stand_alone?  # => nil
+  # ```
   #
-  # === \Document Type
+  # If you don't explicitly specify an XML declaration:
+  #
+  # - The effective XML declaration is a default.
+  # - There is no REXML::XMLDecl child.
+  # - The output of #write will not have an XML declaration.
+  #
+  # ```
+  # doc = REXML::Document.new('')
+  # doc.xml_decl.to_s # => ""
+  # doc.version       # => "1.0"
+  # doc.encoding      # => "UTF-8"
+  # doc.stand_alone?  # => nil
+  # doc.children.size # => 0
+  # ```
+  #
+  # ### \Document Type
   #
   # A document need not have a document type:
   #
-  #   doc = REXML::Document.new('')
-  #   doc.doctype  # => nil
+  # ```
+  # doc = REXML::Document.new('')
+  # doc.doctype  # => nil
+  # ```
   #
   # The document type may be explicitly initialized:
   #
-  #   doc = REXML::Document.new('<!DOCTYPE html>')
-  #   doc.doctype.class # => REXML::DocType
-  #   doc.doctype.to_s  # => "<!DOCTYPE html>"
+  # ```
+  # doc = REXML::Document.new('<!DOCTYPE html>')
+  # doc.doctype.class # => REXML::DocType
+  # doc.doctype.to_s  # => "<!DOCTYPE html>"
+  # ```
   #
   # The document type may be replaced:
   #
-  #   doc_type = REXML::DocType.new('sgml')
-  #   doc.add(doc_type)
-  #   doc.doctype.to_s # => "<!DOCTYPE sgml>"
+  # ```
+  # doc_type = REXML::DocType.new('sgml')
+  # doc.add(doc_type)
+  # doc.doctype.to_s # => "<!DOCTYPE sgml>"
+  # ```
   #
-  # === Root \Element
+  # ### Root \Element
   #
   # A document need not have a root element:
   #
-  #   doc.root                                     # => nil
-  #   doc = REXML::Document.new
-  #   doc.root # => nil
+  # ```
+  # doc.root                                     # => nil
+  # doc = REXML::Document.new
+  # doc.root # => nil
+  # ```
   #
   # The root element may be explicitly initialized:
   #
-  #   doc = REXML::Document.new('<root/>')
-  #   puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
-  #     REXML::Element: <root/>
-  #   doc.root # => <root/>
+  # ```
+  # doc = REXML::Document.new('<root/>')
+  # puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
+  # REXML::Element: <root/>
+  # doc.root # => <root/>
+  # ```
   #
   # The root element may be added:
   #
-  #   doc = REXML::Document.new
-  #   doc.add_element(REXML::Element.new('root'))
-  #   doc.root # => <root/>
-  #   puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
-  #   REXML::Element: <root/>
+  # ```
+  # doc = REXML::Document.new
+  # doc.add_element(REXML::Element.new('root'))
+  # doc.root # => <root/>
+  # puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
+  # REXML::Element: <root/>
+  # ```
   #
   # A second element may not be added to the document:
   #
-  #   ele = REXML::Element.new('foo')
-  #   doc.add(ele) # Raises RuntimeError: attempted adding second root element to document
+  # ```
+  # ele = REXML::Element.new('foo')
+  # doc.add(ele) # Raises RuntimeError: attempted adding second root element to document
+  # ```
   #
-  # === Comments
+  # ### Comments
   #
   # The children of a document may include comments:
   #
   #
-  # === Processing Instructions
+  # ### Processing Instructions
   #
   # The children of a document may include processing instructions:
   #
-  #   s = '<?Foo foo?><?Bar bar?><root/>'
-  #   doc = REXML::Document.new(s)
-  #   puts doc.children.map {|child| "#{child.class}: #{child.to_s}" }
-  #   REXML::Instruction: <?Foo foo?>
-  #   REXML::Instruction: <?Bar bar?>
+  # ```
+  # s = '<?Foo foo?><?Bar bar?><root/>'
+  # doc = REXML::Document.new(s)
+  # puts doc.children.map {|child| "#{child.class}: #{child.to_s}" }
+  # REXML::Instruction: <?Foo foo?>
+  # REXML::Instruction: <?Bar bar?>
+  # ```
   #
+  # [xml declaration]:         rdoc-ref:Document@XML+Declaration
+  # [document type]:           rdoc-ref:Document@Document+Type
+  # [root element]:            rdoc-ref:Document@Root+Element
+  # [comments]:                rdoc-ref:Document@Comments
+  # [processing instructions]: rdoc-ref:Document@Processing+Instructions
   #
   class Document < Element
     # A convenient default XML declaration. Use:
