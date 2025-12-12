@@ -31,28 +31,70 @@ module REXML
   #
   # ## The \Document \Object
   #
-  # A \Document object has a tree structure;
-  # it has no parent.
+  # A document has a tree structure, in which the document itself is the top mode;
+  # it may have children, but it has no parent.
   #
-  # Its immediate children may include any or all of these:
+  # The children of a document may be of any of the \REXML classes
+  # that have method `parent=`;
+  # important among those are:
   #
-  # - [XML declaration][xml declaration].
-  # - [Document type][document type].
-  # - [Root element][root element].
-  # - [Comments][comments].
-  # - [Processing instructions][processing instructions].
+  # - REXML::Element: the document's [root element][root element].
+  # - REXML::XMLDecl: contains the document's [XML declaration][xml declaration].
+  # - REXML::DocType: contains the document's [document type][document type].
   #
-  # The document also has certain attributes:
+  # Here's a document that has a child of each of those classes:
   #
-  # - Name
-  # - Node Type
-  # - Encoding
-  # - Version
-  # - Stand-Alone?
+  # ```
+  # xml = <<XML
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <!DOCTYPE html>
+  # <root/>
+  # XML
+  # doc = REXML::Document.new(xml)
+  # doc.children.each.map {|child| puts "  #{child.class}" }
+  #   REXML::XMLDecl
+  #   REXML::Text
+  #   REXML::DocType
+  #   REXML::Element
+  # ```
   #
-  # ## \Document Children
+  # (The REXML::Text object contains whitespace.)
   #
-  # ### XML \Declaration
+  # ## Root \Element
+  #
+  # A document may have an REXML::Element object as a child;
+  # if it does, that object is the _root element_ for the document,
+  # and method #root returns that object.
+  #
+  # The root element may be defined with the initialization:
+  #
+  # ```
+  # doc = REXML::Document.new('<root/>')
+  # puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
+  #   REXML::Element: <root/>
+  # doc.root # => <root/>
+  # ```
+  #
+  # Or the root element may be added after initialization:
+  #
+  # ```
+  # doc = REXML::Document.new
+  # doc.add_element(REXML::Element.new('root'))
+  # doc.root # => <root/>
+  # puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
+  #   REXML::Element: <root/>
+  # ```
+  #
+  # A second element may not be added to the document:
+  #
+  # ```
+  # ele = REXML::Element.new('foo')
+  # doc.add(ele) # Raises RuntimeError: attempted adding second root element to document
+  # ```
+  #
+  # But elements may be added as descendents of the root element.
+  #
+  # ## XML \Declaration
   #
   # A document may have an REXML::XMLDecl object as a child:
   #
@@ -100,9 +142,10 @@ module REXML
   # doc.children.size # => 0
   # ```
   #
-  # ### \Document Type
+  # ## \Document Type
   #
-  # A document need not have a document type:
+  # A document may have an REXML::XMLDecl object as a child;
+  # if it does, method #doctype returns that object:
   #
   # ```
   # doc = REXML::Document.new('')
@@ -113,6 +156,7 @@ module REXML
   #
   # ```
   # doc = REXML::Document.new('<!DOCTYPE html>')
+  # doc.children.size # => 1
   # doc.doctype.class # => REXML::DocType
   # doc.doctype.to_s  # => "<!DOCTYPE html>"
   # ```
@@ -125,64 +169,15 @@ module REXML
   # doc.doctype.to_s # => "<!DOCTYPE sgml>"
   # ```
   #
-  # ### Root \Element
-  #
-  # A document need not have a root element:
+  # A document need not have a document type:
   #
   # ```
-  # doc.root                                     # => nil
-  # doc = REXML::Document.new
-  # doc.root # => nil
+  # doc = REXML::Document.new('')
+  # doc.doctype  # => nil
   # ```
-  #
-  # The root element may be explicitly initialized:
-  #
-  # ```
-  # doc = REXML::Document.new('<root/>')
-  # puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
-  # REXML::Element: <root/>
-  # doc.root # => <root/>
-  # ```
-  #
-  # The root element may be added:
-  #
-  # ```
-  # doc = REXML::Document.new
-  # doc.add_element(REXML::Element.new('root'))
-  # doc.root # => <root/>
-  # puts doc.children.map {|child| "  #{child.class}: #{child.to_s}" }
-  # REXML::Element: <root/>
-  # ```
-  #
-  # A second element may not be added to the document:
-  #
-  # ```
-  # ele = REXML::Element.new('foo')
-  # doc.add(ele) # Raises RuntimeError: attempted adding second root element to document
-  # ```
-  #
-  # ### Comments
-  #
-  # The children of a document may include comments:
-  #
-  #
-  # ### Processing Instructions
-  #
-  # The children of a document may include processing instructions:
-  #
-  # ```
-  # s = '<?Foo foo?><?Bar bar?><root/>'
-  # doc = REXML::Document.new(s)
-  # puts doc.children.map {|child| "#{child.class}: #{child.to_s}" }
-  # REXML::Instruction: <?Foo foo?>
-  # REXML::Instruction: <?Bar bar?>
-  # ```
-  #
+  # [root element]:            rdoc-ref:Document@Root+Element
   # [xml declaration]:         rdoc-ref:Document@XML+Declaration
   # [document type]:           rdoc-ref:Document@Document+Type
-  # [root element]:            rdoc-ref:Document@Root+Element
-  # [comments]:                rdoc-ref:Document@Comments
-  # [processing instructions]: rdoc-ref:Document@Processing+Instructions
   #
   class Document < Element
     # A convenient default XML declaration. Use:
